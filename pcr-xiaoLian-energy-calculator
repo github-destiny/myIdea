@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name=”viewport” content=”width=device-width, initial-scale=1″ />
+    <title>characters</title>
+    <script src="lib/jquery-3.4.1.js"></script>
+    
+    /*
+    制作想法：
+          在玩pcr(princess Connect Re:Dive)时，我总是不知道咲恋会给谁充能，因此制作了这个简单的计算器。
+    我的一些废话：
+          这是一个静态页面，我原打算做一个基于SSM框架的咲恋充能计算器，因此我只模仿bilibili的wiki中的页面，做了一个类似的页面，但是由于我对SSM框架使用的不是很熟练，
+          因此我直接使用了原生js+jquery制作了这个可以计算出谁被充能的静态页面。
+    页面布局：
+          这个页面很简单，页面上有：铺满了现在已知角色的地图（每个角色可被点击），下面的五个小div（被点击的角色将会进入到div中），以及一个分析按钮和一个重置按钮。
+    使用方法：
+          点击地图上的角色，就可以将他们填充到下方队列中，点击分析按钮，会被咲恋充能的角色他的边框将会变成（aqua）蓝色，点击重置按钮，就可以清空队列了。
+    素材获取方法：
+          关于各个角色的站位数值来源于贴吧老哥的图片，我将数据导入到数据库了，同时我也使用了一个取巧的方式，将所有的数据转换成json对象data保存在getResult()方法中了，需要的
+          可以去复制粘贴一下，图片素材来源于bilibili中的pcr角色站位wiki页面，浏览器中使用ctrl+s就可以保存，这种方法很快捷，但是使用爬虫去爬才有意思不是么（笑^-^）
+    最后：
+          大家有什么想法可以留言，GitHub应该是可以留言的吧，另外也希望大家多多指点！
+                  
+    */
+    
+</head>
+<body>
+    <div id="img">
+        <div id="title" align="center">
+            <h2>咲恋充能计算器</h2>
+        </div>
+        <img src="pic/kk.jpg" alt="兰德索尔" style="width: 1160px; height: 652.5px; position: absolute;top: 100px; right: 200px;left: 200px">
+        <div id="charactersImg">
+            <div id="first">
+                <img name="img" title="镜华" src="pic/100px-镜华Q.png" alt="镜华" style="position: absolute; top: 115px;left: 215px;">
+                <img name="img" title="雪" src="pic/100px-雪Q.png" alt="雪"  style="position: absolute; top: 165px;left: 225px;">
+                <img name="img" title="优衣" src="pic/100px-优衣Q.png" alt="优衣"  style="position: absolute; top: 215px;left: 235px;">
+                <img name="img" title="真步" src="pic/100px-真步Q.png" alt="真步"  style="position: absolute; top: 265px;left: 245px;">
+                <img name="img" title="千歌" src="pic/100px-千歌Q.png" alt="千歌"  style="position: absolute; top: 315px;left: 255px;">
+                <img name="img" title="碧" src="pic/100px-碧Q.png" alt="碧"  style="position: absolute; top: 365px;left: 265px;">
+                <img name="img" title="凯露（夏日）" src="pic/100px-凯露（夏日）Q.png" alt="凯露（夏日）"  style="position: absolute; top: 415px;left: 275px;">
+                <img name="img" title="铃莓（夏日）" src="pic/100px-铃莓（夏日）Q.png" alt="铃莓（夏日）"  style="position: absolute; top: 465px;left: 285px;">
+                <img name="img" title="美咲" src="pic/100px-美咲Q.png" alt="美咲"  style="position: absolute; top: 515px;left: 295px;">
+            </div>
+            <div id="second">
+                <img name="img" src="pic/100px-七七香Q.png" alt="七七香" style="position: absolute; top: 115px;left: 375px;">
+                <img name="img" src="pic/100px-初音Q.png" alt="初音" style="position: absolute; top: 120px;left: 320px;">
+                <img name="img" src="pic/100px-凯露Q.png" alt="凯露" style="position: absolute; top: 165px;left: 330px;">
+                <img name="img" src="pic/100px-优衣（新年）Q.png" alt="优衣（新年）" style="position: absolute; top: 215px;left: 340px;">
+                <img name="img" src="pic/100px-美里Q.png" alt="美里" style="position: absolute; top: 265px;left: 350px;">
+                <img name="img" src="pic/100px-铃莓Q.png" alt="铃莓" style="position: absolute; top: 315px;left: 360px;">
+                <img name="img" src="pic/100px-伊绪Q.png" alt="伊绪" style="position: absolute; top: 365px;left: 370px;">
+                <img name="img" src="pic/100px-栞Q.png" alt="栞" style="position: absolute; top: 415px;left: 380px;">
+                <img name="img" src="pic/100px-铃奈Q.png" alt="铃奈" style="position: absolute; top: 465px;left: 390px;">
+                <img name="img" src="pic/100px-璃乃Q.png" alt="璃乃" style="position: absolute; top: 515px;left: 400px;">
+            </div>
+            <div id="third">
+                <img name="img" title="露" src="pic/100px-露Q.png" alt="露" style="position: absolute; top: 165px;left: 480px;">
+                <img name="img" title="安" src="pic/100px-安Q.png" alt="安" style="position: absolute; top: 215px;left: 490px;">
+                <img name="img" title="亚里莎" src="pic/100px-亚里莎Q.png" alt="亚里莎" style="position: absolute; top: 265px;left: 500px;">
+
+                <img name="img" title="依里" src="pic/100px-依里Q.png" alt="依里" style="position: absolute; top: 315px;left: 580px;">
+                <img name="img" title="茜里" src="pic/100px-茜里Q.png" alt="茜里" style="position: absolute; top: 365px;left: 590px;">
+                <img name="img" title="深月" src="pic/100px-深月Q.png" alt="深月" style="position: absolute; top: 415px;left: 600px;">
+                <img name="img" title="铃" src="pic/100px-铃Q.png" alt="铃" style="position: absolute; top: 465px;left: 610px;">
+                <img name="img" title="可可萝（夏日）" src="pic/100px-可可萝（夏日）Q.png" alt="可可萝（夏日）" style="position: absolute; top: 515px;left: 620px;">
+            </div>
+            <div id="fourth">
+                <img name="img" title="古蕾雅" src="pic/100px-古蕾雅Q.png" alt="古蕾雅" style="position: absolute; top: 120px;left: 630px;">
+                <img name="img" title="可可萝" src="pic/100px-可可萝Q.png" alt="可可萝" style="position: absolute; top: 170px;left: 670px;">
+                <img name="img" title="杏奈" src="pic/100px-杏奈Q.png" alt="杏奈" style="position: absolute; top: 220px;left: 720px;">
+                <img name="img" title="咲恋" src="pic/100px-咲恋Q.png" alt="咲恋" style="position: absolute; top: 270px;left: 730px;">
+                <img name="img" title="伊莉亚" src="pic/100px-伊莉亚Q.png" alt="伊莉亚" style="position: absolute; top: 320px;left: 740px;">
+                <img name="img" title="美冬" src="pic/100px-美冬Q.png" alt="美冬" style="position: absolute; top: 370px;left: 750px;">
+                <img name="img" title="妮侬" src="pic/100px-妮侬Q.png" alt="妮侬" style="position: absolute; top: 420px;left: 760px;">
+                <img name="img" title="莫妮卡" src="pic/100px-莫妮卡Q.png" alt="莫妮卡" style="position: absolute; top: 470px;left: 770px;">
+                <img name="img" title="由加莉" src="pic/100px-由加莉Q.png" alt="由加莉" style="position: absolute; top: 520px;left: 780px;">
+            </div>
+            <div id="fifth">
+                <img name="img" title="真阳" src="pic/100px-真阳Q.png" alt="真阳" style="position: absolute; top: 120px;left: 800px;">
+                <img name="img" title="忍" src="pic/100px-忍Q.png" alt="忍" style="position: absolute; top: 170px;left: 820px;">
+                <img name="img" title="美美" src="pic/100px-美美Q.png" alt="美美" style="position: absolute; top: 220px;left: 830px;">
+
+                <img name="img" title="克里斯提娜" src="pic/100px-克里斯提娜Q.png" alt="克里斯提娜" style="position: absolute; top: 280px;left: 930px;">
+                <img name="img" title="静流" src="pic/100px-静流Q.png" alt="静流" style="position: absolute; top: 320px;left: 940px;">
+                <img name="img" title="怜" src="pic/100px-怜Q.png" alt="怜" style="position: absolute; top: 370px;left: 990px;">
+                <img name="img" title="姬塔" src="pic/100px-姬塔Q.png" alt="姬塔" style="position: absolute; top: 420px;left: 1000px;">
+                <img name="img" title="胡桃" src="pic/100px-胡桃Q.png" alt="胡桃" style="position: absolute; top: 470px;left: 1010px;">
+                <img name="img" title="佩可莉姆(夏日)" src="pic/100px-佩可莉姆（夏日）Q.png" alt="佩可莉姆(夏日)" style="position: absolute; top: 520px;left: 1020px;">
+            </div>
+            <div id="sixth">
+                <img name="img" title="惠理子" src="pic/100px-惠理子Q.png" alt="惠理子" style="position: absolute; top: 120px;left: 1050px;">
+                <img name="img" title="珠希(夏日)" src="pic/100px-珠希（夏日）Q.png" alt="珠希（夏日）" style="position: absolute; top: 170px;left: 1060px;">
+                <img name="img" title="智" src="pic/100px-智Q.png" alt="智" style="position: absolute; top: 220px;left: 1070px;">
+                <img name="img" title="珠希" src="pic/100px-珠希Q.png" alt="珠希" style="position: absolute; top: 270px;left: 1080px;">
+                <img name="img" title="绫音" src="pic/100px-绫音Q.png" alt="绫音" style="position: absolute; top: 320px;left: 1090px;">
+                <img name="img" title="未奏希" src="pic/100px-未奏希Q.png" alt="未奏希" style="position: absolute; top: 370px;left: 1100px;">
+                <img name="img" title="日和莉" src="pic/100px-日和莉Q.png" alt="日和莉" style="position: absolute; top: 420px;left: 1110px;">
+                <img name="img" title="纺希" src="pic/100px-纺希Q.png" alt="纺希" style="position: absolute; top: 470px;left: 1120px;">
+                <img name="img" title="秋乃" src="pic/100px-秋乃Q.png" alt="秋乃" style="position: absolute; top: 520px;left: 1130px;">
+            </div>
+            <div id="last">
+                <img name="img" title="真琴" src="pic/100px-真琴Q.png" alt="真琴" style="position: absolute; top: 120px;left: 1150px;">
+                <img name="img" title="望" src="pic/100px-望Q.png" alt="望" style="position: absolute; top: 170px;left: 1160px;">
+                <img name="img" title="流夏" src="pic/100px-流夏Q.png" alt="流夏" style="position: absolute; top: 220px;left: 1170px;">
+                <img name="img" title="佩可莉姆" src="pic/100px-佩可莉姆Q.png" alt="佩可莉姆" style="position: absolute; top: 270px;left: 1180px;">
+                <img name="img" title="香织" src="pic/100px-香织Q.png" alt="香织" style="position: absolute; top: 320px;left: 1190px;">
+                <img name="img" title="纯" src="pic/100px-纯Q.png" alt="纯" style="position: absolute; top: 370px;left: 1200px;">
+                <img name="img" title="空花" src="pic/100px-空花Q.png" alt="空花" style="position: absolute; top: 420px;left: 1210px;">
+                <img name="img" title="宫子" src="pic/100px-宫子Q.png" alt="宫子" style="position: absolute; top: 470px;left: 1220px;">
+                <img name="img" title="莉玛" src="pic/100px-莉玛Q.png" alt="莉玛" style="position: absolute; top: 520px;left: 1250px;">
+            </div>
+
+        </div>
+        <div id="list">
+            <div id="listOne" style="position: absolute; width: 75px; height: 75px; border: 2px solid;border-radius: 8px;top: 700px; left: 450px;">
+
+            </div>
+
+            <div id="listTwo" style="position: absolute; width: 75px; height: 75px; border: 2px solid;border-radius: 8px;top: 700px; left: 570px;">
+
+            </div>
+
+            <div id="listThree" style="position: absolute; width: 75px; height: 75px; border: 2px solid;border-radius: 8px;top: 700px; left: 690px">
+
+            </div>
+
+            <div id="listFour" style="position: absolute; width: 75px; height: 75px; border: 2px solid;border-radius: 8px;top: 700px; left: 810px">
+
+            </div>
+
+            <div id="listFive" style="position: absolute; width: 75px; height: 75px; border: 2px solid;border-radius: 8px;top: 700px; left: 930px">
+
+            </div>
+        </div>
+
+        <input type="button" value="分析" onclick="getResult()" style="position: absolute;top: 725px; left: 1030px;width: 50px;height: 35px;color: gray;background-color: aqua">
+
+        <input type="button" value="重置" onclick="reset()" style="position: absolute;top: 725px; left: 380px;width: 50px;height: 35px;color: gray;background-color: aqua">
+    </div>
+
+    <script type="text/javascript">
+
+        var localStorage = window.localStorage
+        var min = 0
+
+        $(function () {
+            //为每一个角色绑定了单击事件
+            f()
+            //点击div清除里面的内容
+            div()
+        })
+
+        function f() {
+            $.each($("img[name=img]"), function (i, n) {
+                $(n).on("click", function () {
+                    // alert($(n).attr("src"))
+                    //先获取图片的src属性
+                    var src = $(n).attr("src");
+                    //组装成为一个html
+                    var htmlSrc = '<img name="img" src="'+ src +'" style="position: absolute;width: 75px;height: 75px">';
+                    //遍历所有的id为list的div下的所有div
+                    $list = $("#list").children()
+                    // console.log($list)
+                    $list.each(function (i, n) {
+                        //获取子div的id
+                        var id = $(n).attr("id")
+                        //检查div中是否有内容
+                        var html = $.trim($("#"+id).html())
+                        // console.log(html)
+                        if(html.indexOf(src) != -1){
+                            alert("不能选择相同角色!")
+                            return false;
+                        }
+                        //如果div中的内容为空，那么将图片填充到div中
+                        if(html == ''){
+                            //alert("id是"+id)
+                            $("#"+id).html(htmlSrc)
+                            return false;
+                        }
+                    })
+
+                })
+            })
+        }
+
+        function div() {
+            $list = $("#list").children()
+            // console.log($list.attr("src"))
+            $list.each(function (i, n) {
+                $(n).on("click", function () {
+                    $(n).html("")
+                    $(n).css("border", "2px solid")
+                })
+            })
+        }
+
+        function reset() {
+            $list = $("#list").children()
+            // console.log($list.attr("src"))
+            $list.each(function (i, n) {
+                $(n).html("")
+            })
+        }
+
+        function getResult() {
+            var data = {
+                "characters":[
+                    {
+                        "id":1,
+                        "name":"怜(新年)",
+                        "station":"前卫",
+                        "stationNum":153
+                    },
+                    {
+                        "id":2,
+                        "name":"香织",
+                        "station":"前卫",
+                        "stationNum":145
+                    },
+                    {
+                        "id":3,
+                        "name":"空花(大江户)",
+                        "station":"前卫",
+                        "stationNum":140
+                    },
+                    {
+                        "id":4,
+                        "name":"纯",
+                        "station":"前卫",
+                        "stationNum":135
+                    },
+                    {
+                        "id":5,
+                        "name":"空花",
+                        "station":"前卫",
+                        "stationNum":130
+                    },
+                    {
+                        "id":6,
+                        "name":"宫子",
+                        "station":"前卫",
+                        "stationNum":125
+                    },
+                    {
+                        "id":7,
+                        "name":"莉玛",
+                        "station":"前卫",
+                        "stationNum":105
+                    },
+                    {
+                        "id":8,
+                        "name":"嘉夜",
+                        "station":"前卫",
+                        "stationNum":168
+                    },
+                    {
+                        "id":9,
+                        "name":"真琴",
+                        "station":"前卫",
+                        "stationNum":165
+                    },
+                    {
+                        "id":10,
+                        "name":"矛依未",
+                        "station":"前卫",
+                        "stationNum":162
+                    },
+                    {
+                        "id":11,
+                        "name":"望",
+                        "station":"前卫",
+                        "stationNum":160
+                    },
+                    {
+                        "id":12,
+                        "name":"可可萝(新年)",
+                        "station":"前卫",
+                        "stationNum":159
+                    },
+                    {
+                        "id":13,
+                        "name":"流夏",
+                        "station":"前卫",
+                        "stationNum":158
+                    },
+                    {
+                        "id":14,
+                        "name":"佩可莉姆(公主)",
+                        "station":"前卫",
+                        "stationNum":155
+                    },
+                    {
+                        "id":15,
+                        "name":"佩可莉姆",
+                        "station":"前卫",
+                        "stationNum":155
+                    },
+                    {
+                        "id":16,
+                        "name":"涩谷凛",
+                        "station":"前卫",
+                        "stationNum":153
+                    },
+                    {
+                        "id":17,
+                        "name":"纺希",
+                        "station":"前卫",
+                        "stationNum":195
+                    },
+                    {
+                        "id":18,
+                        "name":"绫音(圣诞节)",
+                        "station":"前卫",
+                        "stationNum":190
+                    },
+                    {
+                        "id":19,
+                        "name":"惠理子(情人节)",
+                        "station":"前卫",
+                        "stationNum":null
+                    },
+                    {
+                        "id":20,
+                        "name":"克萝依",
+                        "station":"前卫",
+                        "stationNum":185
+                    },
+                    {
+                        "id":21,
+                        "name":"茉莉",
+                        "station":"前卫",
+                        "stationNum":185
+                    },
+                    {
+                        "id":22,
+                        "name":"真琴(夏日)",
+                        "station":"前卫",
+                        "stationNum":180
+                    },
+                    {
+                        "id":23,
+                        "name":"秋乃",
+                        "station":"前卫",
+                        "stationNum":180
+                    },
+                    {
+                        "id":24,
+                        "name":"妮诺(大江户)",
+                        "station":"前卫",
+                        "stationNum":175
+                    },
+                    {
+                        "id":25,
+                        "name":"日和莉(新年)",
+                        "station":"前卫",
+                        "stationNum":170
+                    },
+                    {
+                        "id":26,
+                        "name":"惠理子",
+                        "station":"前卫",
+                        "stationNum":230
+                    },
+                    {
+                        "id":27,
+                        "name":"珠希",
+                        "station":"前卫",
+                        "stationNum":225
+                    },
+                    {
+                        "id":28,
+                        "name":"琪爱儿",
+                        "station":"前卫",
+                        "stationNum":222
+                    },
+                    {
+                        "id":29,
+                        "name":"智",
+                        "station":"前卫",
+                        "stationNum":220
+                    },
+                    {
+                        "id":30,
+                        "name":"珠希",
+                        "station":"前卫",
+                        "stationNum":215
+                    },
+                    {
+                        "id":31,
+                        "name":"未奏希(万圣节)",
+                        "station":"前卫",
+                        "stationNum":212
+                    },
+                    {
+                        "id":32,
+                        "name":"绫音",
+                        "station":"前卫",
+                        "stationNum":210
+                    },
+                    {
+                        "id":33,
+                        "name":"未奏希",
+                        "station":"前卫",
+                        "stationNum":205
+                    },
+                    {
+                        "id":34,
+                        "name":"日和莉",
+                        "station":"前卫",
+                        "stationNum":200
+                    },
+                    {
+                        "id":35,
+                        "name":"胡桃(圣诞节)",
+                        "station":"前卫",
+                        "stationNum":295
+                    },
+                    {
+                        "id":36,
+                        "name":"克里斯提娜",
+                        "station":"前卫",
+                        "stationNum":290
+                    },
+                    {
+                        "id":37,
+                        "name":"静流",
+                        "station":"前卫",
+                        "stationNum":285
+                    },
+                    {
+                        "id":38,
+                        "name":"克里斯提娜(圣诞节)",
+                        "station":"前卫",
+                        "stationNum":265
+                    },
+                    {
+                        "id":39,
+                        "name":"伊莉亚(圣诞节)",
+                        "station":"前卫",
+                        "stationNum":255
+                    },
+                    {
+                        "id":40,
+                        "name":"怜",
+                        "station":"前卫",
+                        "stationNum":250
+                    },
+                    {
+                        "id":41,
+                        "name":"姬塔",
+                        "station":"前卫",
+                        "stationNum":245
+                    },
+                    {
+                        "id":42,
+                        "name":"胡桃",
+                        "station":"前卫",
+                        "stationNum":240
+                    },
+                    {
+                        "id":43,
+                        "name":"佩可莉姆(夏日)",
+                        "station":"前卫",
+                        "stationNum":235
+                    },
+                    {
+                        "id":44,
+                        "name":"莫妮卡",
+                        "station":"中卫",
+                        "stationNum":410
+                    },
+                    {
+                        "id":45,
+                        "name":"由加莉",
+                        "station":"中卫",
+                        "stationNum":405
+                    },
+                    {
+                        "id":46,
+                        "name":"真阳",
+                        "station":"中卫",
+                        "stationNum":395
+                    },
+                    {
+                        "id":47,
+                        "name":"真阳(护林员）",
+                        "station":"中卫",
+                        "stationNum":390
+                    },
+                    {
+                        "id":48,
+                        "name":"静流(情人节)",
+                        "station":"中卫",
+                        "stationNum":385
+                    },
+                    {
+                        "id":49,
+                        "name":"岛村卯月",
+                        "station":"中卫",
+                        "stationNum":370
+                    },
+                    {
+                        "id":50,
+                        "name":"美美(万圣节)",
+                        "station":"中卫",
+                        "stationNum":365
+                    },
+                    {
+                        "id":51,
+                        "name":"忍",
+                        "station":"中卫",
+                        "stationNum":365
+                    },
+                    {
+                        "id":52,
+                        "name":"美美",
+                        "station":"中卫",
+                        "stationNum":360
+                    },
+                    {
+                        "id":53,
+                        "name":"忍(万圣节)",
+                        "station":"中卫",
+                        "stationNum":440
+                    },
+                    {
+                        "id":54,
+                        "name":"杏奈",
+                        "station":"中卫",
+                        "stationNum":440
+                    },
+                    {
+                        "id":55,
+                        "name":"咲恋",
+                        "station":"中卫",
+                        "stationNum":430
+                    },
+                    {
+                        "id":56,
+                        "name":"香织(夏日)",
+                        "station":"中卫",
+                        "stationNum":425
+                    },
+                    {
+                        "id":57,
+                        "name":"伊莉亚",
+                        "station":"中卫",
+                        "stationNum":425
+                    },
+                    {
+                        "id":58,
+                        "name":"铃(游侠)",
+                        "station":"中卫",
+                        "stationNum":422
+                    },
+                    {
+                        "id":59,
+                        "name":"美冬",
+                        "station":"中卫",
+                        "stationNum":420
+                    },
+                    {
+                        "id":60,
+                        "name":"望(圣诞节)",
+                        "station":"中卫",
+                        "stationNum":418
+                    },
+                    {
+                        "id":61,
+                        "name":"妮侬",
+                        "station":"中卫",
+                        "stationNum":415
+                    },
+                    {
+                        "id":62,
+                        "name":"深月",
+                        "station":"中卫",
+                        "stationNum":565
+                    },
+                    {
+                        "id":63,
+                        "name":"铃",
+                        "station":"中卫",
+                        "stationNum":550
+                    },
+                    {
+                        "id":64,
+                        "name":"拉姆",
+                        "station":"中卫",
+                        "stationNum":545
+                    },
+                    {
+                        "id":65,
+                        "name":"雷姆",
+                        "station":"中卫",
+                        "stationNum":540
+                    },
+                    {
+                        "id":66,
+                        "name":"可可萝（夏日）",
+                        "station":"中卫",
+                        "stationNum":535
+                    },
+                    {
+                        "id":67,
+                        "name":"古蕾雅",
+                        "station":"中卫",
+                        "stationNum":525
+                    },
+                    {
+                        "id":68,
+                        "name":"步未",
+                        "station":"中卫",
+                        "stationNum":510
+                    },
+                    {
+                        "id":69,
+                        "name":"可可萝",
+                        "station":"中卫",
+                        "stationNum":500
+                    },
+                    {
+                        "id":70,
+                        "name":"美冬(夏日)",
+                        "station":"中卫",
+                        "stationNum":495
+                    },
+                    {
+                        "id":71,
+                        "name":"宫子(万圣节)",
+                        "station":"中卫",
+                        "stationNum":590
+                    },
+                    {
+                        "id":72,
+                        "name":"咲恋(夏日)",
+                        "station":"中卫",
+                        "stationNum":585
+                    },
+                    {
+                        "id":73,
+                        "name":"依里",
+                        "station":"中卫",
+                        "stationNum":575
+                    },
+                    {
+                        "id":74,
+                        "name":"茜里",
+                        "station":"中卫",
+                        "stationNum":570
+                    },
+                    {
+                        "id":75,
+                        "name":"铃奈",
+                        "station":"后卫",
+                        "stationNum":705
+                    },
+                    {
+                        "id":76,
+                        "name":"璃乃",
+                        "station":"后卫",
+                        "stationNum":700
+                    },
+                    {
+                        "id":77,
+                        "name":"凯露(新年)",
+                        "station":"后卫",
+                        "stationNum":690
+                    },
+                    {
+                        "id":78,
+                        "name":"碧(插班生)",
+                        "station":"后卫",
+                        "stationNum":680
+                    },
+                    {
+                        "id":79,
+                        "name":"似似花",
+                        "station":"后卫",
+                        "stationNum":660
+                    },
+                    {
+                        "id":80,
+                        "name":"露",
+                        "station":"后卫",
+                        "stationNum":640
+                    },
+                    {
+                        "id":81,
+                        "name":"安",
+                        "station":"后卫",
+                        "stationNum":630
+                    },
+                    {
+                        "id":82,
+                        "name":"亚里莎",
+                        "station":"后卫",
+                        "stationNum":625
+                    },
+                    {
+                        "id":83,
+                        "name":"霞",
+                        "station":"后卫",
+                        "stationNum":730
+                    },
+                    {
+                        "id":84,
+                        "name":"艾米莉亚",
+                        "station":"后卫",
+                        "stationNum":725
+                    },
+                    {
+                        "id":85,
+                        "name":"铃莓(新年)",
+                        "station":"后卫",
+                        "stationNum":722
+                    },
+                    {
+                        "id":86,
+                        "name":"铃莓",
+                        "station":"后卫",
+                        "stationNum":720
+                    },
+                    {
+                        "id":87,
+                        "name":"伊绪(夏日)",
+                        "station":"后卫",
+                        "stationNum":715
+                    },
+                    {
+                        "id":88,
+                        "name":"伊绪",
+                        "station":"后卫",
+                        "stationNum":715
+                    },
+                    {
+                        "id":89,
+                        "name":"栞(魔法)",
+                        "station":"后卫",
+                        "stationNum":712
+                    },
+                    {
+                        "id":90,
+                        "name":"栞",
+                        "station":"后卫",
+                        "stationNum":710
+                    },
+                    {
+                        "id":91,
+                        "name":"铃奈(夏日)",
+                        "station":"后卫",
+                        "stationNum":705
+                    },
+                    {
+                        "id":92,
+                        "name":"千歌(圣诞节)",
+                        "station":"后卫",
+                        "stationNum":770
+                    },
+                    {
+                        "id":93,
+                        "name":"露娜",
+                        "station":"后卫",
+                        "stationNum":765
+                    },
+                    {
+                        "id":94,
+                        "name":"美咲",
+                        "station":"后卫",
+                        "stationNum":760
+                    },
+                    {
+                        "id":95,
+                        "name":"初音",
+                        "station":"后卫",
+                        "stationNum":755
+                    },
+                    {
+                        "id":96,
+                        "name":"凯露",
+                        "station":"后卫",
+                        "stationNum":750
+                    },
+                    {
+                        "id":97,
+                        "name":"优衣（新年）",
+                        "station":"后卫",
+                        "stationNum":745
+                    },
+                    {
+                        "id":98,
+                        "name":"七七香",
+                        "station":"后卫",
+                        "stationNum":740
+                    },
+                    {
+                        "id":99,
+                        "name":"美里",
+                        "station":"后卫",
+                        "stationNum":735
+                    },
+                    {
+                        "id":100,
+                        "name":"雾原霞(魔法)",
+                        "station":"后卫",
+                        "stationNum":730
+                    },
+                    {
+                        "id":101,
+                        "name":"优妮",
+                        "station":"后卫",
+                        "stationNum":807
+                    },
+                    {
+                        "id":102,
+                        "name":"雪",
+                        "station":"后卫",
+                        "stationNum":805
+                    },
+                    {
+                        "id":103,
+                        "name":"优衣",
+                        "station":"后卫",
+                        "stationNum":800
+                    },
+                    {
+                        "id":104,
+                        "name":"真步",
+                        "station":"后卫",
+                        "stationNum":795
+                    },
+                    {
+                        "id":105,
+                        "name":"真步(夏日)",
+                        "station":"后卫",
+                        "stationNum":792
+                    },
+                    {
+                        "id":106,
+                        "name":"千歌",
+                        "station":"后卫",
+                        "stationNum":790
+                    },
+                    {
+                        "id":107,
+                        "name":"碧",
+                        "station":"后卫",
+                        "stationNum":785
+                    },
+                    {
+                        "id":108,
+                        "name":"凯露（夏日）",
+                        "station":"后卫",
+                        "stationNum":780
+                    },
+                    {
+                        "id":109,
+                        "name":"铃莓（夏日）",
+                        "station":"后卫",
+                        "stationNum":775
+                    },
+                    {
+                        "id":110,
+                        "name":"镜华(万圣节)",
+                        "station":"后卫",
+                        "stationNum":820
+                    },
+                    {
+                        "id":111,
+                        "name":"美咲(万圣节)",
+                        "station":"后卫",
+                        "stationNum":815
+                    },
+                    {
+                        "id":112,
+                        "name":"镜华",
+                        "station":"后卫",
+                        "stationNum":810
+                    }
+                ]
+            }
+            localStorage.clear()
+
+
+            $list = $("#list").children()
+            $list.each(function (i, n) {
+                $img = $(n).children()
+                if($.trim($img.attr("src")) != ''){
+                    var src = $img.attr("src")
+                    src = src.slice(10, src.length-5)
+                    $.each(data, function (i, ele) {
+                        $.each(ele, function (i, n) {
+                            if(n.name == src && n.name != "咲恋"){
+                                //console.log(n.name + "----------->" + n.stationNum)
+                                var min = Math.abs(n.stationNum - 430)
+                                localStorage.setItem(n.name, min.toString())
+                            }
+                        })
+                    })
+                }
+            })
+            min = localStorage.getItem(localStorage.key(0))
+            // console.log("getResult方法中的min:"+min)
+            compareNum()
+            var name = tempVarSaveClass.name
+            // console.log("getResult方法中的name值:" + name)
+            showDiv(name)
+
+        }
+
+        function compareNum() {
+            tempVarSaveClass.name = ""
+            tempVarSaveClass.min = 0
+
+            for(var i = 1; i < localStorage.length; i++){
+                var key = localStorage.key(i)
+                var stationNum = localStorage.getItem(key)
+                stationNum = parseInt(stationNum)
+                if(stationNum < min){
+                    tempVarSaveClass.name = key
+                    tempVarSaveClass.min = stationNum
+                    min = stationNum
+                }
+            }
+            // console.log("min="+min)
+        }
+
+        function showDiv(name) {
+            $list = $("#list").children()
+            $list.each(function (i, n) {
+                $img = $(n).children()
+                if($.trim($img.attr("src")).indexOf(name) != -1){
+                    $(n).css("border", "2px solid aqua")
+                }
+            })
+        }
+
+        var tempVarSaveClass = {
+            name : "",
+            min : 0 ,
+            showTemp : function () {
+                console.log("===============================")
+                console.log("name:" + tempVarSaveClass.name)
+                console.log("min:" + tempVarSaveClass.min)
+                console.log("===============================")
+            }
+        }
+
+
+
+    </script>
+</body>
+</html>
