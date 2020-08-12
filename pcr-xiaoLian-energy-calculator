@@ -1,10 +1,13 @@
-<!DOCTYPE html>    
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name=”viewport” content=”width=device-width, initial-scale=1″ />
     <title>characters</title>
-    <script src="lib/jquery-3.4.1.js"></script>    
+    <script src="lib/jquery-3.4.1.js"></script>
+
+
+
 </head>
 <body>
     <div id="img">
@@ -875,7 +878,7 @@
                     $.each(data, function (i, ele) {
                         $.each(ele, function (i, n) {
                             if(n.name == src && n.name != "咲恋"){
-                                //console.log(n.name + "----------->" + n.stationNum)
+                                console.log(n.name + "----------->" + n.stationNum)
                                 var min = Math.abs(n.stationNum - 430)
                                 localStorage.setItem(n.name, min.toString())
                             }
@@ -887,14 +890,23 @@
             // console.log("getResult方法中的min:"+min)
             compareNum()
             var name = tempVarSaveClass.name
-            // console.log("getResult方法中的name值:" + name)
+            console.log("getResult方法中的name值:" + name)
             showDiv(name)
-
         }
 
         function compareNum() {
             tempVarSaveClass.name = ""
             tempVarSaveClass.min = 0
+
+            if(localStorage.length == 1){
+                var key = localStorage.key(0)
+                var stationNum = localStorage.getItem(key)
+                stationNum = parseInt(stationNum)
+                tempVarSaveClass.name = key
+                tempVarSaveClass.min = stationNum
+                min = stationNum
+                return
+            }
 
             for(var i = 1; i < localStorage.length; i++){
                 var key = localStorage.key(i)
