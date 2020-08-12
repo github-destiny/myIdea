@@ -4,26 +4,7 @@
     <meta charset="UTF-8">
     <meta name=”viewport” content=”width=device-width, initial-scale=1″ />
     <title>characters</title>
-    <script src="lib/jquery-3.4.1.js"></script>
-    
-    /*
-    制作想法：
-          在玩pcr(princess Connect Re:Dive)时，我总是不知道咲恋会给谁充能，因此制作了这个简单的计算器。
-    我的一些废话：
-          这是一个静态页面，我原打算做一个基于SSM框架的咲恋充能计算器，因此我只模仿bilibili的wiki中的页面，做了一个类似的页面，但是由于我对SSM框架使用的不是很熟练，
-          因此我直接使用了原生js+jquery制作了这个可以计算出谁被充能的静态页面。
-    页面布局：
-          这个页面很简单，页面上有：铺满了现在已知角色的地图（每个角色可被点击），下面的五个小div（被点击的角色将会进入到div中），以及一个分析按钮和一个重置按钮。
-    使用方法：
-          点击地图上的角色，就可以将他们填充到下方队列中，点击分析按钮，会被咲恋充能的角色他的边框将会变成（aqua）蓝色，点击重置按钮，就可以清空队列了。
-    素材获取方法：
-          关于各个角色的站位数值来源于贴吧老哥的图片，我将数据导入到数据库了，同时我也使用了一个取巧的方式，将所有的数据转换成json对象data保存在getResult()方法中了，需要的
-          可以去复制粘贴一下，图片素材来源于bilibili中的pcr角色站位wiki页面，浏览器中使用ctrl+s就可以保存，这种方法很快捷，但是使用爬虫去爬才有意思不是么（笑^-^）
-    最后：
-          大家有什么想法可以留言，GitHub应该是可以留言的吧，另外也希望大家多多指点！
-                  
-    */
-    
+    <script src="lib/jquery-3.4.1.js"></script>    
 </head>
 <body>
     <div id="img">
